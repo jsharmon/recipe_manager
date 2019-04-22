@@ -27,7 +27,9 @@ INTENDED FEATURES:
 """
 
 import tkinter as tk
+from tkinter import scrolledtext as tkst
 from tkinter import ttk
+from tkinter import tix
 import matplotlib
 matplotlib.use("TkAgg")
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
@@ -40,14 +42,17 @@ import pandas as pd
 import numpy as np
 import os
 import webbrowser as wb
+import recipe_database_interface as rdi
 
-LARGE_FONT= ("Verdana", 12)
+LARGE_FONT = ("Verdana", 12)
 
 # Save lines of the recipe file into global variable called 'recipeLines'
-global recipeLines
-recipeLines = []
+global isDBEmpty
+isDBEmpty = True
 global recipePath
 recipePath = ''
+global recipeDB
+recipeDBName = 'RecipeFile.db'
 
 
 
@@ -66,8 +71,8 @@ class RecipeManager(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        pageTuple = (StartPage, HomePage, AddPage, SearchPage, RandomPage, URLAddPage, MealPlanPage,
-                     GroceryPage, MealTrackPage)
+        pageTuple = (StartPage, HomePage, HomePageEmptyDB, AddPage, SearchPage, RandomPage, URLAddPage, 
+                     MealPlanPage, GroceryPage, MealTrackPage)
         for F in pageTuple:
             frame = F(container, self)
             self.frames[F] = frame
@@ -152,14 +157,13 @@ class StartPage(tk.Frame):
         if(os.path.isdir(thisFileDir + '\\' + usernameReturning)):
             recipePath = thisFileDir + '\\' + usernameReturning
 
-            # Grab txt file containing recipes and read each line into a list
-            recipeFile = open(recipePath + '\\RecipeFile.txt', 'r')
-            for line in recipeFile:
-                recipeLines.append(line)
-            recipeFile.close()
-
-            # Navigate to home page after recipes are loaded
-            controller.show_frame(HomePage)
+            # Grab database containing recipes, check if it is empty
+            isDBEmpty = rdi.is_DB_empty(recipePath)
+            # HomePage label redefinition needs to be done here
+            if(isDBEmpty):
+                controller.show_frame(HomePageEmptyDB)
+            else:
+                controller.show_frame(HomePage)
 
         # If directory does not exist, display 'username not found'
         elif(not(os.path.isdir(thisFileDir + '\\' + usernameReturning))):
@@ -179,13 +183,11 @@ class StartPage(tk.Frame):
             recipePath = thisFileDir + '\\' + usernameNew
             os.mkdir(thisFileDir + '\\' + usernameNew) # create folder w username
 
-            # Make new empty text file to hold recipes
-            newRecipeFile = open(recipePath + '\\RecipeFile.txt', 'w')
-            newRecipeFile.write('')
-            newRecipeFile.close()
+            # Create new SQL database to hold recipes
+            rdi.create_new_DB(recipePath)
 
-            # Go to home page from login page
-            controller.show_frame(HomePage)
+            # Go to empty DB home page from login page
+            controller.show_frame(HomePageEmptyDB)
 
         # If directory exists, display 'username already exists'
         elif(os.path.isdir(thisFileDir + '\\' + usernameNew)):
@@ -193,21 +195,20 @@ class StartPage(tk.Frame):
             entry.insert(0, "That username is already taken.")
 
 
-
+# Need to actualy do something with the home page here
 class HomePage(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        label = ttk.Label(self, text='Recipes exist! Press button for summary', font=LARGE_FONT)
+        label.pack(pady=10)
 
-        # If txt file is empty, say there are no recipes yet
-        if(not recipeLines):
-            label = ttk.Label(self, text='No recipes yet!', font=LARGE_FONT)
-            label.pack(pady=10)
-        
-        # If the txt file is not empty, display the title and summary of some random recipes
-        elif(recipeLines):
-            pass
+class HomePageEmptyDB(tk.Frame):
 
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+        label = ttk.Label(self, text='No recipes yet!', font=LARGE_FONT)
+        label.pack(pady=10)
 
 
 
@@ -226,8 +227,21 @@ class AddPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
 
-        label = ttk.Label(self,text='add page',font=LARGE_FONT)
-        label.pack(pady=10)
+        colList = ['Recipe Name:', 'Recipe Summary:', "Today's Date:", 'Type of cuisine:', 
+                   'Ingredients (format - ingredient,amount,unit then enter):', 'Recipe Text:', 
+                   'Prep Time:', 'Cook Time:', 'Calories:', 'Servings:', 'Tags:']
+        label = [0]*len(colList)
+        text = [0]*len(colList)
+        for i in range(0,len(colList)):
+            label[i] = ttk.Label(self, text=colList[i], font=LARGE_FONT)
+            label[i].pack(padx=15, pady=2, anchor='w')
+            if (i in [0,2,3,6,7,8,9,10]):
+                text[i] = tk.Entry(self, borderwidth=2)
+                text[i].pack(ipadx=720-30, padx=15, pady=(5,20), anchor='w')
+            else:
+                text[i] = tkst.ScrolledText(self, height=7, borderwidth=2)
+                text[i].pack(ipadx=720-30, padx=15, pady=(5,20), anchor='w')
+
 
 
 
