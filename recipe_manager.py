@@ -10,14 +10,15 @@ INTENDED FEATURES:
 1) Fully navigatable app using only GUI controls.
 2) Ability to add recipes and append these to a single txt file. Each recipe will be one line with
    a unique separator to allow for easy splitting into the constituent parts for display.
-3) Ability to edit and update recipes.
+3) Ability to edit and update recipes in real-time while viewing.
 4) Recipe viewing in a standard format, i.e. html/CSS with a single CSS format for all recipes.
    Recipes will be viewed in the web browser.
 5) Recipe randomizer - have the app select a random recipe for you.
 6) Search feature. Search recipes by tags, ingredients, or time it takes to cook them.
 7) Meal planning. Interface the app with Google calendar.
 8) Include pictures in recipe, allow user to add photos.
-9) Grocery list generator based on a number of selected recipes.
+9) Grocery list generator based on a number of selected recipes and an ingredient inventory provided
+   by the user.
 10) Recipe grabber. Take a url from the user, scan the webpage, and automatically load in and save 
     the recipe.
 11) Cooking tracker. Show how many times in a week/month you cooked, give ability to sort or color by 
@@ -30,12 +31,6 @@ import tkinter as tk
 from tkinter import scrolledtext as tkst
 from tkinter import ttk
 from tkinter import tix
-import matplotlib
-matplotlib.use("TkAgg")
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
-from matplotlib.figure import Figure
-from matplotlib import style
-style.use('ggplot')
 import urllib
 import json
 import pandas as pd
@@ -174,14 +169,19 @@ class StartPage(tk.Frame):
     def getUsernameNew(self, entry, controller):
         # Get entry from UI
         usernameNew = entry.get()
- 
+    
         # Get current working directory; for me, it's /Users/jsharmon
         thisFileDir = os.getcwd() + '\\' + 'RecipeManager'
+
+        # If running on new computer, create recipe manager folder
+        if(not(os.path.isdir(thisFileDir))):
+            os.mkdir(thisFileDir)
+
         # If folder doesn't already exist, make it and make a new recipe text file
-        if(not(os.path.isdir(thisFileDir + '\\' + usernameNew))):
+        recipePath = thisFileDir + '\\' + usernameNew
+        if(not(os.path.isdir(recipePath))):
             # Save the recipe path as a global variable to use file later
-            recipePath = thisFileDir + '\\' + usernameNew
-            os.mkdir(thisFileDir + '\\' + usernameNew) # create folder w username
+            os.mkdir(recipePath) # create folder w username
 
             # Create new SQL database to hold recipes
             rdi.create_new_DB(recipePath)
@@ -190,10 +190,9 @@ class StartPage(tk.Frame):
             controller.show_frame(HomePageEmptyDB)
 
         # If directory exists, display 'username already exists'
-        elif(os.path.isdir(thisFileDir + '\\' + usernameNew)):
+        elif(os.path.isdir(recipePath)):
             entry.delete(0, len(usernameNew))
             entry.insert(0, "That username is already taken.")
-
 
 # Need to actualy do something with the home page here
 class HomePage(tk.Frame):
@@ -222,10 +221,10 @@ class HomePageEmptyDB(tk.Frame):
 # Begin defining Recipe menu page classes.
 ######################################################################################################
 
-class AddPage(tk.Frame):
-
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
+class AddPage(tix.ScrolledWindow):
+    def __init__(self, root, controller):
+        sw = tix.ScrolledWindow(self, scrollbar=tix.Y)
+        sw.pack(fill=tix.BOTH, expand=1)
 
         colList = ['Recipe Name:', 'Recipe Summary:', "Today's Date:", 'Type of cuisine:', 
                    'Ingredients (format - ingredient,amount,unit then enter):', 'Recipe Text:', 
@@ -234,13 +233,13 @@ class AddPage(tk.Frame):
         text = [0]*len(colList)
         for i in range(0,len(colList)):
             label[i] = ttk.Label(self, text=colList[i], font=LARGE_FONT)
-            label[i].pack(padx=15, pady=2, anchor='w')
+            label[i].pack(padx=15, pady=2, anchor='nw')
             if (i in [0,2,3,6,7,8,9,10]):
                 text[i] = tk.Entry(self, borderwidth=2)
-                text[i].pack(ipadx=720-30, padx=15, pady=(5,20), anchor='w')
+                text[i].pack(ipadx=720-30, padx=15, pady=(5,20), anchor='nw')
             else:
                 text[i] = tkst.ScrolledText(self, height=7, borderwidth=2)
-                text[i].pack(ipadx=720-30, padx=15, pady=(5,20), anchor='w')
+                text[i].pack(ipadx=720-30, padx=15, pady=(5,20), anchor='nw')
 
 
 

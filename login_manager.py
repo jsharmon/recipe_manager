@@ -7,11 +7,16 @@ def getUsernameNew(self, entry, controller):
  
     # Get current working directory; for me, it's /Users/jsharmon
     thisFileDir = os.getcwd() + '\\' + 'RecipeManager'
+
+    # If running on new computer, create recipe manager folder
+    if(not(os.path.isdir(thisFileDir))):
+        os.mkdir(thisFileDir)
+
     # If folder doesn't already exist, make it and make a new recipe text file
-    if(not(os.path.isdir(thisFileDir + '\\' + usernameNew))):
+    recipePath = thisFileDir + '\\' + usernameNew
+    if(not(os.path.isdir(recipePath))):
         # Save the recipe path as a global variable to use file later
-        recipePath = thisFileDir + '\\' + usernameNew
-        os.mkdir(thisFileDir + '\\' + usernameNew) # create folder w username
+        os.mkdir(recipePath) # create folder w username
 
         # Create new SQL database to hold recipes
         rdi.create_new_DB(recipePath)
@@ -20,6 +25,6 @@ def getUsernameNew(self, entry, controller):
         controller.show_frame(HomePageEmptyDB)
 
     # If directory exists, display 'username already exists'
-    elif(os.path.isdir(thisFileDir + '\\' + usernameNew)):
+    elif(os.path.isdir(recipePath)):
         entry.delete(0, len(usernameNew))
         entry.insert(0, "That username is already taken.")
