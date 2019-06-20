@@ -7,6 +7,10 @@ import sys
 
 # Subclass QDialog - just an empty container - to serve as the container for the login page
 # Have the login run as a dialog before going to main app
+######################################################################################################################
+# Add checks to make sure usernames are valid - basically just if the chars can be used in a directory
+# If not valid, display somethign like "Username invalid; no special chars" or something
+######################################################################################################################
 class LoginDialog(wid.QDialog): 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -119,6 +123,24 @@ class HomePage(wid.QWidget):
 
 
 
+# Subclass QDialog for 'Recipe Added!' message
+class RecipeAddedDialog(wid.QDialog):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Set layout; this is a vertical box orientation
+        layout = wid.QVBoxLayout()
+
+        # Add label and button
+        label = wid.QLabel('Recipe Added!')
+        layout.addWidget(label)
+        button = wid.QPushButton('Return to app...')
+        button.pressed.connect(lambda: self.accept())
+        layout.addWidget(button)
+
+        # Set layout for dialog
+        self.setLayout(layout)
+
 # Subclass QWidget to serve as empty container for add page
 class AddPage(wid.QWidget):
     def __init__(self, DBPath, *args, **kwargs):
@@ -152,16 +174,30 @@ class AddPage(wid.QWidget):
             if type(entry) == type(wid.QTextEdit()):
                 entryText.append(entry.toPlainText())
 
-        # Now, actually do some SQL stuff to add the recipe to the DB
+        # Insert the recipe as a new row in the DB, recipes table
+        rdi.insertRecipe(self.DBPath, entryText)
         ############################################################################################################################
-        # Need to implement recipe adding! will come from recipeDatabaseInterface.py!
+        # Bare minimum check to make sure a name, ingredients, and recipe text have been entered
+        # Need to handle empty entries as well; maybe set to np.NaN
+        # Check for duplicate recipes based on name, case insensitive
+        # Setup another dialog window for failed addition, don't clear entries in that case
+        # Return a flag from either successful added dialog or 
+        # Don't do any more of this until after SQL on Coursera
         ############################################################################################################################
+
+        # Show dialog stating that the recipe has been added
+        recipeAdded = RecipeAddedDialog()
+        recipeAdded.exec_()
+
+        # Clear the entries after the dialog has been closed
+        for entry in textEntries:
+            entry.clear()
 
     def populateEntries(self, layout):
         # Names of text entries to add
         lineEntriesFirst = ['Recipe Name:', 'Recipe Summary:', "Today's Date (mm/dd/yyyy):", 'Type of cuisine:']
         plainTextEdits = ['Ingredients (format - ingredient,amount,unit then enter):', 'Recipe Text:']
-        lineEntriesSecond = ['Prep Time:', 'Cook Time:', 'Calories:', 'Servings:', 'Tags:']
+        lineEntriesSecond = ['Prep Time (mins):', 'Cook Time (mins):', 'Calories:', 'Servings:', 'Tags:']
 
         # Create empty list to fill with entry objects
         entries = []
@@ -200,11 +236,12 @@ class AddPage(wid.QWidget):
         edit = wid.QTextEdit()
         layout.addWidget(edit)
 
+        # Return entry to get text later
         return edit
 
 
 
-# Subclass QMainWindow to serve as empty container for z-stack of page widgets
+# Subclass QMainWindow to serve as empty container for tab widget
 class RecipeManager(wid.QMainWindow):   
     def __init__(self, DBPath, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -234,7 +271,7 @@ class RecipeManager(wid.QMainWindow):
 
         # Create scroll area in case window is resized, contain tabs within it
         scrollArea = wid.QScrollArea()
-        scrollArea.setMinimumWidth(tabs.sizeHint().width())
+        scrollArea.setMinimumWidth(tabs.sizeHint().width() + scrollArea.verticalScrollBar().sizeHint().width())
         scrollArea.setHorizontalScrollBarPolicy(core.Qt.ScrollBarAlwaysOff)
         scrollArea.setWidget(tabs)
         scrollArea.setWidgetResizable(True)
