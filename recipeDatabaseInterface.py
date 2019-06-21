@@ -42,3 +42,5 @@ def insertRecipe(recipePath, entryText):
     c.execute('INSERT INTO recipes VALUES (?,?,?,?,?,?,?,?,?,?,?)', entryText)
     conn.commit()
     conn.close()
+
+# Delete recipe function
