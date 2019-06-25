@@ -1,6 +1,8 @@
 import PyQt5.QtWidgets as wid
 import RecipeDatabaseInterface as rdi
 import os
+import urllib.request, urllib.parse, urllib.error
+from bs4 import BeautifulSoup
 
 # Subclass QDialog for 'Recipe Added!' message
 class RecipeAddedDialog(wid.QDialog):
@@ -57,7 +59,7 @@ class AddPage(wid.QWidget):
         rdi.insertRecipe(self.DBPath, entryText)
         ############################################################################################################################
         # Bare minimum check to make sure a name, ingredients, and recipe text have been entered
-        # Need to handle empty entries as well; maybe set to np.NaN
+        # Need to handle empty entries as well; empty strings
         # Check for duplicate recipes based on name, case insensitive
         # Setup another dialog window for failed addition, don't clear entries in that case
         # Return a flag from either successful added dialog or 
@@ -124,17 +126,23 @@ class AddPage(wid.QWidget):
 # Had to copy/paste code from AddPage...wasn't sure how to
 # inherit from it and have it still be a dialog object
 class EditScrapedEntryDialog(wid.QDialog):
-    def __init__(self, DBPath, *args, **kwargs):
+    def __init__(self, DBPath, recipeURL, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
-        # Set the path to the database as instance variable
+        # Set the path to the database as instance variable,
+        # set recipe URL from text entry
         self.DBPath = DBPath
+        self.recipeURL = recipeURL
 
         # Set layout; this is a vertical box orientation
         layout = wid.QVBoxLayout()
 
         # Populate entries for AddPage, get text entry objects to get text later
         textEntries = self.populateEntries(layout)
+
+        # Use BeautifulSoup to parse html from web page, get list of
+        # strings to populate dialog text entries
+        self.scrapeRecipe(textEntries, self.recipeURL)
 
         # Create add button, connect a signal (button press)
         addButton = wid.QPushButton('Add Recipe')
@@ -143,6 +151,22 @@ class EditScrapedEntryDialog(wid.QDialog):
 
         # Set layout
         self.setLayout(layout)
+
+    def scrapeRecipe(self, textEntries, recipeURL):
+        # Grab the html from the webpage
+        html = urllib.request.urlopen(recipeURL).read()
+
+        # Create BeautifulSoup object to parse html
+        soup = BeautifulSoup(html, 'html.parser')
+
+        #######################################################################################
+        # Get list of strings with appropriate data from
+        # webpage
+
+        # Populate text entries with scraped strings
+
+        # Set up way to save original URL or at least have a source associated with recipe
+        #######################################################################################
 
     def addCallback(self, textEntries):
         # Get the text from each entry, read into list of strings
@@ -177,9 +201,6 @@ class EditScrapedEntryDialog(wid.QDialog):
         # Close URL scraped text entry edit dialog
         self.accept()
 
-    #########################################################################################################
-    # Update entry population to take input from URL, populate with that by default
-    #########################################################################################################
     def populateEntries(self, layout):
         # Names of text entries to add
         lineEntriesFirst = ['Recipe Name:', 'Recipe Summary:', "Today's Date (mm/dd/yyyy):", 'Type of cuisine:']
@@ -240,21 +261,19 @@ class URLImportPage(wid.QWidget):
         # Create QLineEdit for URL entry
         urlEntry = wid.QLineEdit()
         urlEntry.setText('Enter URL...')
-        urlEntry.returnPressed.connect(lambda: self.urlCallback())
+        urlEntry.returnPressed.connect(lambda: self.urlCallback(urlEntry))
         layout.addWidget(urlEntry)
 
         # Create add button, connect a signal (button press)
         addButton = wid.QPushButton('Get Recipe')
-        addButton.pressed.connect(lambda: self.urlCallback())
+        addButton.pressed.connect(lambda: self.urlCallback(urlEntry))
         layout.addWidget(addButton)
 
         # Set layout
         self.setLayout(layout)
 
-    #############################################################################################
-    # Implement web scraping for recipe content, pass as input to dialog object call
-    #############################################################################################
-    def urlCallback(self):
+    def urlCallback(self, urlEntry):
         # Show dialog for editing scraped recipe text
-        editScrapedEntry = EditScrapedEntryDialog(self.DBPath)
+        url = urlEntry.text()
+        editScrapedEntry = EditScrapedEntryDialog(self.DBPath, url)
         editScrapedEntry.exec_()
