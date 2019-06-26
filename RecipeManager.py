@@ -18,6 +18,17 @@ import RecipeDatabaseInterface as rdi
 
 # Subclass QWidget to serve as empty container for home page
 class HomePage(wid.QWidget):
+    '''
+    This serves as the home page for the Recipe Manager application.
+
+    This class inherits from PyQt5.QtWidgets.QWidget.
+
+    Attributes:
+        DBPath (str): The path to the recipe database as determined during login.
+
+    Constructor Args:
+        DBPath (str): The path to the recipe database as determined during login.
+    '''
     def __init__(self, DBPath, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -27,7 +38,19 @@ class HomePage(wid.QWidget):
 
 
 # Subclass QMainWindow to serve as empty container for tab widget
-class RecipeManager(wid.QMainWindow):   
+class RecipeManager(wid.QMainWindow):
+    '''
+    This serves as the main window for the Recipe Manager application.
+
+    This class inherits from PyQt5.QtWidgets.QMainWindow.
+
+    Attributes:
+        DBPath (str): The path to the recipe database as determined during login.
+
+    Constructor Args:
+        DBPath (str): The path to the recipe database as determined during login.
+    '''
+
     def __init__(self, DBPath, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -58,7 +81,8 @@ class RecipeManager(wid.QMainWindow):
 
         # Create scroll area in case window is resized, contain tabs within it
         scrollArea = wid.QScrollArea()
-        scrollArea.setMinimumWidth(tabs.sizeHint().width() + scrollArea.verticalScrollBar().sizeHint().width())
+        scrollArea.setMinimumWidth(tabs.sizeHint().width() + 
+                                   scrollArea.verticalScrollBar().sizeHint().width())
         scrollArea.setHorizontalScrollBarPolicy(core.Qt.ScrollBarAlwaysOff)
         scrollArea.setWidget(tabs)
         scrollArea.setWidgetResizable(True)

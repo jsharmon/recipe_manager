@@ -8,7 +8,19 @@ import os
 # Add checks to make sure usernames are valid - basically just if the chars can be used in a directory
 # If not valid, display somethign like "Username invalid; no special chars" or something
 ######################################################################################################################
-class LoginDialog(wid.QDialog): 
+class LoginDialog(wid.QDialog):
+    '''
+    This dialog serves as a login page for users.
+
+    This class inherits from PyQt5.QtWidgets.QDialog.
+
+    Attributes:
+        None.
+
+    Constructor Args:
+        None.
+    '''
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

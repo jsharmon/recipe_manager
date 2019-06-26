@@ -6,6 +6,18 @@ from bs4 import BeautifulSoup
 
 # Subclass QDialog for 'Recipe Added!' message
 class RecipeAddedDialog(wid.QDialog):
+    '''
+    Dialog generated to notify a user that a recipe has been successfully added.
+
+    This class inherits from PyQt5.QtWidgets.QDialog.
+
+    Attributes:
+        None.
+
+    Constructor Args:
+        None.
+    '''
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -24,6 +36,18 @@ class RecipeAddedDialog(wid.QDialog):
 
 # Subclass QWidget to serve as empty container for add page
 class AddPage(wid.QWidget):
+    '''
+    This class provides a GUI for adding recipes to the database.
+
+    This class inherits from PyQt5.QtWidgets.QWidget.
+
+    Attributes:
+        DBPath (str): The path to the recipe database as determined during login.
+
+    Constructor Args:
+        DBPath (str): The path to the recipe database as determined during login.
+    '''
+
     def __init__(self, DBPath, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -126,6 +150,20 @@ class AddPage(wid.QWidget):
 # Had to copy/paste code from AddPage...wasn't sure how to
 # inherit from it and have it still be a dialog object
 class EditScrapedEntryDialog(wid.QDialog):
+    '''
+    Dialog generated to allow editing text scraped from a user-supplied URL before adding to the database.
+
+    This class inherits from PyQt5.QtWidgets.QDialog.
+
+    Attributes:
+        DBPath (str): Path to the recipe database.
+        recipeURL (str): User-supplied URL to scrape for recipe text.
+
+    Constructor Args:
+        DBPath (str): Path to the recipe database.
+        recipeURL (str): User-supplied URL to scrape for recipe text.
+    '''
+
     def __init__(self, DBPath, recipeURL, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
@@ -249,6 +287,18 @@ class EditScrapedEntryDialog(wid.QDialog):
 
 # Subclass QWidget as empty container for url import page
 class URLImportPage(wid.QWidget):
+    '''
+    This page takes a user-supplied URL and generates a dialog used for scraping, editing, and adding recipe text to the database.
+
+    This class inherits from PyQt5.QtWidgets.QWidget.
+
+    Attributes:
+        DBPath (str): The path to the recipe database as determined during login.
+
+    Constructor Args:
+        DBPath (str): The path to the recipe database as determined during login.
+    '''
+
     def __init__(self, DBPath, *args, **kwargs):
         super().__init__(*args, **kwargs)
         

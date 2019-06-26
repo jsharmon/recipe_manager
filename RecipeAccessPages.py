@@ -7,6 +7,18 @@ import sys
 
 # Subclass QWidget as empty container for browse page
 class BrowsePage(wid.QWidget):
+    '''
+    This page allows users to browse recipes without specific searches.
+
+    This class inherits from PyQt5.QtWidgets.QWidget.
+
+    Attributes:
+        DBPath (str): The path to the recipe database as determined during login.
+
+    Constructor Args:
+        DBPath (str): The path to the recipe database as determined during login.
+    '''
+
     def __init__(self, DBPath, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
@@ -17,6 +29,18 @@ class BrowsePage(wid.QWidget):
 
 # Subclass QWidget as empty container for search page
 class SearchPage(wid.QWidget):
+    '''
+    This page allows users to search for specific recipes.
+
+    This class inherits from PyQt5.QtWidgets.QWidget.
+
+    Attributes:
+        DBPath (str): The path to the recipe database as determined during login.
+
+    Constructor Args:
+        DBPath (str): The path to the recipe database as determined during login.
+    '''
+
     def __init__(self, DBPath, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
@@ -27,6 +51,18 @@ class SearchPage(wid.QWidget):
 
 # Subclass QWidget as empty container for random page
 class RandomPage(wid.QWidget):
+    '''
+    This page selects and displays a random recipe from the database.
+
+    This class inherits from PyQt5.QtWidgets.QWidget.
+
+    Attributes:
+        DBPath (str): The path to the recipe database as determined during login.
+
+    Constructor Args:
+        DBPath (str): The path to the recipe database as determined during login.
+    '''
+
     def __init__(self, DBPath, *args, **kwargs):
         super().__init__(*args, **kwargs)
         
